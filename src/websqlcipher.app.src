@@ -1,0 +1,13 @@
+{application, websqlcipher,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  cowboy
+                 ]},
+  {mod, { websqlcipher_app, []}},
+  {env, []}
+ ]}.
