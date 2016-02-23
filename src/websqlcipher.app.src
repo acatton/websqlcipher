@@ -2,6 +2,8 @@
  [
   {description, ""},
   {vsn, "1"},
+  {modules, [websqlcipher_app, websqlcipher_database_worker, websqlcipher_db_handler,
+             websqlcipher_index_server, websqlcipher_list_handler, websqlcipher_sup]},
   {registered, []},
   {applications, [
                   kernel,
