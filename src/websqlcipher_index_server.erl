@@ -38,8 +38,16 @@ handle_call({get_database, Name}, _From, State) ->
 			{reply, Error, State}
 	end.
 
-handle_info({'DOWN', _Ref, process, _Pid, _Reason}, State) ->
-	{noreply, State}.
+handle_info({'DOWN', _Ref, process, Pid, _Reason}, State) ->
+	State2 = remove_worker(Pid, State),
+	{noreply, State2}.
+
+remove_worker(WorkerToRemove, #state{database_workers=DatabaseWorkers} = State) ->
+	DatabaseWorkers2 = dict:filter(
+		fun (_, Worker) -> Worker =/= WorkerToRemove end,
+		DatabaseWorkers
+	),
+	State#state{database_workers=DatabaseWorkers2}.
 
 code_change(_OldVsn, State, _Extra) ->
 	{noreply, State}.
@@ -66,6 +74,7 @@ stop_worker(WorkerPid) ->
 create_database_worker(Name, WorkerDict) ->
 	case websqlcipher_database_worker:start(Name) of
 		{ok, Worker} ->
+			monitor(process, Worker),
 			WorkerDict2 = dict:store(Name, Worker, WorkerDict),
 			{ok, WorkerDict2};
 		Error = {error, _} ->
