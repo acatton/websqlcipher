@@ -102,7 +102,7 @@ run_query(Req, State, Query) ->
 	Parameters = Query#sql_query.parameters,
 	% TODO: Handle error
 	{ok, Result} = websqlcipher_database_worker:execute(Worker, SQL, Parameters),
-	JSON = {[{<<"result">>, Result}]},
+	JSON = {[{<<"result">>, convert_dbresult_to_json(Result)}]},
 	Body = jiffy:encode(JSON),
 	cowboy_req:set_resp_body(Body, Req).
 
@@ -111,6 +111,17 @@ handle_get_json(Req, State) ->
 	?assertNotEqual(Worker, undefined),
 	% TODO: Handle error
 	{ok, Result} = websqlcipher_database_worker:list_tables(Worker),
-	JSON = {[{<<"tables">>, Result}]},
+	JSON = {[{<<"tables">>, convert_dbresult_to_json(Result)}]},
 	Body = jiffy:encode(JSON),
 	{Body, Req, State}.
+
+convert_dbresult_to_json(Result) when is_list(Result) ->
+	lists:map(fun convert_dbresult_to_json/1, Result);
+convert_dbresult_to_json(Result) when is_tuple(Result) ->
+	convert_dbresult_to_json(
+	  [element(I, Result) || I <- lists:seq(1, tuple_size(Result))]
+	);
+convert_dbresult_to_json(undefined) ->
+	null;
+convert_dbresult_to_json(Result) ->
+	Result.

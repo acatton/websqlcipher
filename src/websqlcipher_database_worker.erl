@@ -5,7 +5,7 @@
 -export([execute/3, list_tables/1]).
 -export([init/1, handle_call/3]).
 
--record(state, {name}).
+-record(state, {name, connection=undef}).
 
 start(Name) ->
 	gen_server:start(?MODULE, [Name], []).
@@ -25,7 +25,29 @@ execute(Worker, Query, Parameters) ->
 list_tables(Worker) ->
 	gen_server:call(Worker, list_tables).
 
+% TODO: This copy/paste a lot of code, this needs to be factored
 handle_call({'query', Query, Parameters}, _From, State) ->
-	{reply, {ok, []}, State};
+	State2 = idempotent_connect(State),
+	Connection = State2#state.connection,
+	Result = get_query_results(Connection, Query, Parameters),
+	{reply, {ok, Result}, State};
 handle_call(list_tables, _From, State) ->
-	{reply, {ok, []}, State}.
+	State2 = idempotent_connect(State),
+	Connection = State2#state.connection,
+	Result = get_table_list(Connection),
+	{reply, {ok, Result}, State2}.
+
+idempotent_connect(#state{connection=undef} = State) ->
+	{ok, Connection} = esqlite3:open(":memory:"),
+	State#state{connection=Connection};
+idempotent_connect(State) ->
+	State.
+
+get_table_list(Connection) ->
+	Query = "SELECT name, sql "
+	        "FROM   sqlite_master "
+	        "WHERE  type = 'table';",
+	get_query_results(Connection, Query, []).
+
+get_query_results(Connection, Query, Parameters) ->
+	esqlite3:q(Query, Parameters, Connection).
