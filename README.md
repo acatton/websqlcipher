@@ -19,3 +19,10 @@ WebSQLCipher aims to scale and distribute SQLCipher very easily.
            -H "Content-Type: application/json" \
            -d '{"query": "select * from sqlite_master;", "parameters": []}' \
            -v
+
+## TODO
+
+  * Refactor `func(Object, Param1, Param2)` to the erlang style `func(Param1, Param2, Object)`
+  * Annotate types
+  * Write tests
+  * Remove duplicated/copy-pasted code
