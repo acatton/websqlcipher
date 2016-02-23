@@ -10,3 +10,12 @@ WebSQLCipher aims to scale and distribute SQLCipher very easily.
     $ rebar compile
     # Run it in development mode (the port 8080 is hardcoded in the code)
     $ erl -pa ebin -pa deps/*/ebin -eval "application:ensure_all_started(websqlcipher).
+
+## How to query it
+
+    $ curl http://localhost:8080/foocom \
+           -X POST \
+           -H "Accept: application/json" \
+           -H "Content-Type: application/json" \
+           -d '{"query": "select * from sqlite_master;", "parameters": []}' \
+           -v
