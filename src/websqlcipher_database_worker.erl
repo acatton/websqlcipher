@@ -12,7 +12,7 @@ start(Name) ->
 
 init([Name]) ->
 	State = #state{name=Name},
-	case re:run(Name, <<"^[a-zA-Z0-9]{1,100}$">>, [{capture, none}]) of
+	case re:run(Name, <<"^[a-zA-Z0-9_]{1,100}$">>, [{capture, none}]) of
 		match ->
 			{ok, State};
 		nomatch ->
