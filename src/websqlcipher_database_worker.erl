@@ -30,14 +30,14 @@ handle_call({'query', Query, Parameters}, _From, State) ->
 	State2 = idempotent_connect(State),
 	Connection = State2#state.connection,
 	Result = get_query_results(Connection, Query, Parameters),
-	{reply, {ok, Result}, State};
+	{reply, {ok, Result}, State2};
 handle_call(list_tables, _From, State) ->
 	State2 = idempotent_connect(State),
 	Connection = State2#state.connection,
 	Result = get_table_list(Connection),
 	{reply, {ok, Result}, State2}.
 
-idempotent_connect(#state{connection=undef} = State) ->
+idempotent_connect(#state{connection=undef, name=Name} = State) ->
 	{ok, Connection} = esqlite3:open(":memory:"),
 	State#state{connection=Connection};
 idempotent_connect(State) ->

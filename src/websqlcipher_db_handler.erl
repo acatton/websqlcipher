@@ -111,7 +111,7 @@ handle_get_json(Req, State) ->
 	?assertNotEqual(Worker, undefined),
 	% TODO: Handle error
 	{ok, Result} = websqlcipher_database_worker:list_tables(Worker),
-	JSON = {[{<<"tables">>, convert_dbresult_to_json(Result)}]},
+	JSON = {[{<<"tables">>, {Result}}]},
 	Body = jiffy:encode(JSON),
 	{Body, Req, State}.
 
